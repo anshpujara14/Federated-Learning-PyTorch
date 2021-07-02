@@ -9,6 +9,18 @@ from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
 from sampling import cifar_iid, cifar_noniid
 
 
+### Need to implement the following code for the sampling rate of each client
+
+# for inx, client in enumerate(clients):
+#     trainset_ind_list = list(train_group[inx])
+#     client['trainset'] = getActualImgs(global_train, trainset_ind_list, args.local_batches)
+#     client['testset'] = getActualImgs(global_test, list(test_group[inx]), args.local_batches)
+#     client['samples'] = len(trainset_ind_list) / args.images
+
+### Replace "train_group" with "user_group"
+
+
+
 def get_dataset(args):
     """ Returns train and test datasets and a user group which is a dict where
     the keys are the user index and the values are the corresponding data for
@@ -71,6 +83,16 @@ def get_dataset(args):
 
     return train_dataset, test_dataset, user_groups
 
+
+### Need to implement this in average_weights() for multiplying the weight of the clients' samples
+
+# client_models = [clients[i]['model'] for i in range(len(clients))]
+# samples = [clients[i]['samples'] for i in range(len(clients))]
+
+# for k in global_dict.keys():
+#         global_dict[k] = torch.stack([client_models[i].state_dict()[k].float() * samples[i] for i in range(len(client_models))], 0).sum(0)
+
+### Add the parameter clients and extract "samples" from it
 
 def average_weights(w):
     """
