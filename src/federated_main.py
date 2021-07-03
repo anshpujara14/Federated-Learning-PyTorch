@@ -16,7 +16,7 @@ from tensorboardX import SummaryWriter
 from options import args_parser
 from update import LocalUpdate, test_inference
 from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar
-from utils import get_dataset, average_weights, exp_details
+from utils import get_dataset, average_weights, exp_details, add_sampling_rate
 
 
 if __name__ == '__main__':
@@ -29,12 +29,14 @@ if __name__ == '__main__':
     args = args_parser()
     exp_details(args)
 
-    if args.gpu_id:
-        torch.cuda.set_device(args.gpu_id)
+    if args.gpu:
+        torch.cuda.set_device(args.gpu)
     device = 'cuda' if args.gpu else 'cpu'
 
     # load dataset and user groups
     train_dataset, test_dataset, user_groups = get_dataset(args)
+
+    clients_sample_list = add_sampling_rate(user_groups, len(train_dataset), args)
 
     # BUILD MODEL
     if args.model == 'cnn':
@@ -87,9 +89,15 @@ if __name__ == '__main__':
                 model=copy.deepcopy(global_model), global_round=epoch)
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
+        
+        print(local_weights)
+        # extract sampling percentage of each active client
+        samples = []
+        for i in idxs_users:
+            samples.append(clients_sample_list[i]['samples'])
 
         # update global weights
-        global_weights = average_weights(local_weights)
+        global_weights = average_weights(local_weights, samples)
 
         # update global weights
         global_model.load_state_dict(global_weights)
