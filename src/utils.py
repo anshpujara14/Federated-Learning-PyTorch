@@ -49,10 +49,10 @@ def get_dataset(args):
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))])
 
-        train_dataset = datasets.MNIST(data_dir, train=True, download=True,
+        train_dataset = datasets.MNIST(data_dir, train=True, download=False,
                                        transform=apply_transform)
 
-        test_dataset = datasets.MNIST(data_dir, train=False, download=True,
+        test_dataset = datasets.MNIST(data_dir, train=False, download=False,
                                       transform=apply_transform)
 
         # sample training data amongst users
@@ -73,9 +73,11 @@ def get_dataset(args):
 
 def add_sampling_rate(user_groups, len_dataset, args):
     clients_list = []
+    d = {}
     for key in user_groups:
-        sampling_rate = (len(user_groups[key])/len_dataset
-        clients_list.append({'client':user_groups[1], 'samples':sampling_rate})
+        sampling_rate = (len(user_groups[key])/len_dataset)
+        d = {"client" : user_groups[key], "samples" : sampling_rate}
+        clients_list.append(d)
     
     return clients_list
 
@@ -90,15 +92,17 @@ def add_sampling_rate(user_groups, len_dataset, args):
 
 ### Add the parameter clients and extract "samples" from it
 
-def average_weights(w):
+def average_weights(w, samples):
     """
     Returns the average of the weights.
     """
     w_avg = copy.deepcopy(w[0])
+    j = 0
     for key in w_avg.keys():
         for i in range(1, len(w)):
-            w_avg[key] += w[i][key]
-        w_avg[key] = torch.div(w_avg[key], len(w))
+            w_avg[key] += w[i][key] 
+        w_avg[key] = torch.div(w_avg[key], len(w)) * samples[j]
+        j = j+1
     return w_avg
 
 
