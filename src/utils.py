@@ -8,19 +8,6 @@ from torchvision import datasets, transforms
 from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
 from sampling import cifar_iid, cifar_noniid
 
-
-### Need to implement the following code for the sampling rate of each client
-
-# for inx, client in enumerate(clients):
-#     trainset_ind_list = list(train_group[inx])
-#     client['trainset'] = getActualImgs(global_train, trainset_ind_list, args.local_batches)
-#     client['testset'] = getActualImgs(global_test, list(test_group[inx]), args.local_batches)
-#     client['samples'] = len(trainset_ind_list) / args.images
-
-### Replace "train_group" with "user_group"
-
-
-
 def get_dataset(args):
     """ Returns train and test datasets and a user group which is a dict where
     the keys are the user index and the values are the corresponding data for
@@ -82,6 +69,15 @@ def get_dataset(args):
                 user_groups = mnist_noniid(train_dataset, args.num_users)
 
     return train_dataset, test_dataset, user_groups
+
+
+def add_sampling_rate(user_groups, len_dataset, args):
+    clients_list = []
+    for key in user_groups:
+        sampling_rate = (len(user_groups[key])/len_dataset
+        clients_list.append({'client':user_groups[1], 'samples':sampling_rate})
+    
+    return clients_list
 
 
 ### Need to implement this in average_weights() for multiplying the weight of the clients' samples
